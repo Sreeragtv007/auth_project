@@ -1,0 +1,19 @@
+# Virtual environment
+venv/
+env/
+
+# Byte-compiled / optimized files
+__pycache__/
+*.pyc
+
+# Django database and media
+db.sqlite3
+media/
+
+# Environment variables
+.env
+
+# Static and migration files (optional)
+staticfiles/
+**/migrations/*.py
+!**/migrations/__init__.py
