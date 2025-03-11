@@ -37,6 +37,17 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+
+
+    # custom 
+    'authentication',
+
+
+    # third-party
+    'rest_framework',
+    'drf_yasg', 
+
+
 ]
 
 MIDDLEWARE = [
@@ -121,3 +132,14 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+
+# settings.py
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = 'sreeragtv91@gmail.com'  # Your Gmail address
+EMAIL_HOST_PASSWORD = 'gqbl mbol rbxl ljbp'  # Your Gmail password or App Password
+DEFAULT_FROM_EMAIL = 'sreeragtv91@gmail.com'
