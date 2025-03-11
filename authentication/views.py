@@ -20,13 +20,14 @@ class userRegister(APIView):
     def post(self, request):
         email = request.data.get('email')
         password = request.data.get('password')
-        
+
         if User.objects.filter(email=email).exists():
             return Response({'error': 'User already exists'}, status=status.HTTP_400_BAD_REQUEST)
 
         otp = generateOtp()
-        message = f"Your OTP is {otp}"
-        subject = "OTP for Registration"
+
+        subject = f"Your OTP is {otp}"
+        message = "OTP for Registration"
         mail = sendMail(email, otp, message, subject)
         if mail == True:
             if Userotp.objects.filter(email=email).exists():
@@ -36,4 +37,6 @@ class userRegister(APIView):
         else:
             return Response({'error': 'unexpexted error found'}, status=status.HTTP_400_BAD_REQUEST)
 
-        return Response("User Registered", status=status.HTTP_201_CREATED)
+        return Response({"message": "OTP sent to email"}, status=200)
+
+    
