@@ -4,9 +4,9 @@ from django.db import models
 
 
 class Userotp(models.Model):
-    email = models.EmailField()
+    email = models.EmailField(unique=True)
     otp = models.IntegerField()
-    varifaied = models.BooleanField(default=False)
+    password = models.CharField(max_length=20)
     
     def __str__(self):
         return self.email
