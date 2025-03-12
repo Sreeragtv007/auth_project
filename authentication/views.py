@@ -113,7 +113,12 @@ class logoutUser(APIView):
 class userDetail(APIView):
     
     
+    permission_classes=[IsAuthenticated]
+    
     def get(self,request):
+        token = request.COOKIES.get('auth_token')
+    
+        
         return Response('test')
 
 #

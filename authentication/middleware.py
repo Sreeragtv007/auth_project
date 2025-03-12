@@ -4,8 +4,10 @@ from rest_framework.permissions import IsAuthenticated, AllowAny
 
 class CookieTokenAuthentication(TokenAuthentication):
     def authenticate(self, request):
+        
        
         token = request.COOKIES.get('auth_token')
+        print(token)
         if not token:
             return None 
 
