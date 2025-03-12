@@ -37,6 +37,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    
 
 
     # custom 
@@ -46,6 +47,7 @@ INSTALLED_APPS = [
     # third-party
     'rest_framework',
     'drf_yasg', 
+    'rest_framework.authtoken'
 
 
 ]
@@ -143,3 +145,18 @@ EMAIL_USE_TLS = True
 EMAIL_HOST_USER = 'sreeragtv91@gmail.com'  # Your Gmail address
 EMAIL_HOST_PASSWORD = 'gqbl mbol rbxl ljbp'  # Your Gmail password or App Password
 DEFAULT_FROM_EMAIL = 'sreeragtv91@gmail.com'
+
+
+
+
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'authentication.middleware.CookieTokenAuthentication',
+    ],
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticated',
+    ],
+}
+
+

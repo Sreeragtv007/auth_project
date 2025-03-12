@@ -1,4 +1,4 @@
-from django.shortcuts import redirect, render
+from django.shortcuts import redirect, render, get_object_or_404
 from django.http import HttpResponse
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -6,8 +6,12 @@ from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 from django.contrib.auth.models import User
 from .models import Userotp
-from .serializers import UserotpSerializer
+from .serializers import UserotpSerializer, userSerilaizer
 from authentication.utilis import generateOtp, sendMail
+from django.contrib.auth import authenticate, login
+from rest_framework.permissions import IsAuthenticated, AllowAny
+from rest_framework.decorators import permission_classes, authentication_classes
+from rest_framework.authtoken.models import Token
 # Create your views here.
 
 
@@ -17,6 +21,8 @@ class test(APIView):
 
 
 class userRegister(APIView):
+    permission_classes = [AllowAny]
+
     def post(self, request):
         email = request.data.get('email')
         password = request.data.get('password')
@@ -26,8 +32,6 @@ class userRegister(APIView):
         if User.objects.filter(email=email).exists():
             return Response({'error': 'User already exists'}, status=status.HTTP_400_BAD_REQUEST)
 
-        
-
         subject = f"Your OTP is {otp}"
         message = "OTP for Registration"
         mail = sendMail(email, otp, message, subject)
@@ -36,7 +40,7 @@ class userRegister(APIView):
                 Userotp.objects.filter(email=email).update(otp=otp)
             else:
                 serializer = UserotpSerializer(data=request.data)
-                
+
                 if serializer.is_valid():
                     serializer.save()
                 else:
@@ -48,17 +52,43 @@ class userRegister(APIView):
 
 
 class verifyRegistration(APIView):
+    permission_classes = [AllowAny]
+
     def post(self, request):
-        
-        email = request.data.get('email')
-        otp = request.data.get('otp')
+        email = request.data['email']
+        otp = request.data['otp']
 
         if Userotp.objects.filter(email=email, otp=otp).exists():
-            userotp=Userotp.objects.filter(email=email, otp=otp)
-            print(userotp)
-            user = User.objects.create_user(email=email, username=email)
-            userotp.delete()
-            
-            return Response({'message': 'User Verified and account created'}, status=status.HTTP_200_OK)
+            userotp = Userotp.objects.get(email=email, otp=otp)
+            request.data['username'] = email
+            request.data['password'] = userotp.password
+
+            request.data.pop('email')
+            request.data.pop('otp')
+            try:
+
+                user_obj = User.objects.create_user(
+                    username=request.data['username'], password=request.data['password'])
+            except Exception as e:
+                return Response({"message": str(e)})
+
+            user = authenticate(
+                username=request.data['username'], password=request.data['password'])
+
+            if user:
+                token, created = Token.objects.get_or_create(user=user)
+                response = Response({'message': 'Login successful'})
+                response.set_cookie(
+                    key='auth_token',
+                    value=token.key,
+                    # Prevents JavaScript access (XSS protection)
+                    httponly=True,
+                    samesite='Lax',  # Adjust based on frontend/backend deployment setup
+                    secure=True  # Use only in HTTPS environments
+                )
+                return response
+            return Response({'error': 'Invalid credentials'}, status=400)
+
         else:
-            return Response({'error': 'Invalid OTP'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"message": "otp is invalid"}, status=status.HTTP_400_BAD_REQUEST)
+#
