@@ -53,7 +53,6 @@ class userRegister(APIView):
 
 class verifyRegistration(APIView):
     permission_classes = [AllowAny]
-
     def post(self, request):
         email = request.data['email']
         otp = request.data['otp']
@@ -72,10 +71,20 @@ class verifyRegistration(APIView):
             except Exception as e:
                 return Response({"message": str(e)})
 
-            user = authenticate(
-                username=request.data['username'], password=request.data['password'])
+            return Response({"message": "user verified"})
 
-            if user:
+        else:
+            return Response({"message": "otp is invalid"}, status=status.HTTP_400_BAD_REQUEST)
+
+
+class loginUser(APIView):
+    permission_classes = [AllowAny]
+    def post(self, request):
+        email = request.data['email']
+        password = request.data['password']
+        user = authenticate(username=email,password=password)
+
+        if user:
                 token, created = Token.objects.get_or_create(user=user)
                 response = Response({'message': 'Login successful'})
                 response.set_cookie(
@@ -83,12 +92,18 @@ class verifyRegistration(APIView):
                     value=token.key,
                     # Prevents JavaScript access (XSS protection)
                     httponly=True,
-                    samesite='Lax',  # Adjust based on frontend/backend deployment setup
+                    #samesite='Lax',  # Adjust based on frontend/backend deployment setup
                     secure=True  # Use only in HTTPS environments
                 )
                 return response
-            return Response({'error': 'Invalid credentials'}, status=400)
+        return Response({'error': 'Invalid credentials'}, status=400)
+    
+    
+    
+class userDetail(APIView):
+    permission_classes=[AllowAny]
+    
+    def get(self,request):
+        return Response('test')
 
-        else:
-            return Response({"message": "otp is invalid"}, status=status.HTTP_400_BAD_REQUEST)
 #

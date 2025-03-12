@@ -153,10 +153,7 @@ DEFAULT_FROM_EMAIL = 'sreeragtv91@gmail.com'
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'authentication.middleware.CookieTokenAuthentication',
-    ],
-    'DEFAULT_PERMISSION_CLASSES': [
-        'rest_framework.permissions.IsAuthenticated',
-    ],
+    ]
 }
 
 
