@@ -92,7 +92,7 @@ class loginUser(APIView):
                     value=token.key,
                     # Prevents JavaScript access (XSS protection)
                     httponly=True,
-                    #samesite='Lax',  # Adjust based on frontend/backend deployment setup
+                    samesite='Lax',  # Adjust based on frontend/backend deployment setup
                     secure=True  # Use only in HTTPS environments
                 )
                 return response
@@ -100,8 +100,18 @@ class loginUser(APIView):
     
     
     
-class userDetail(APIView):
+class logoutUser(APIView):
     permission_classes=[AllowAny]
+    def post(self,request):
+        response = Response({'message': 'Logged out'})
+        response.delete_cookie('auth_token')
+        return response
+
+    
+    
+    
+class userDetail(APIView):
+    
     
     def get(self,request):
         return Response('test')
