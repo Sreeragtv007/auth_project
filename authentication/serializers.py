@@ -13,6 +13,17 @@ class UserotpSerializer(serializers.ModelSerializer):
     class Meta:
         model = Userotp
         fields = '__all__'
+        
+    def validate(self, attrs):
+        return super().validate(attrs)
+    
+    def create(self, validated_data):
+        userotp = Userotp.objects.filter(email=validated_data['email'])
+        if userotp:
+            userotp.update(otp=validated_data['otp'])
+            return userotp
+        else:
+            return super().create(validated_data)
    
         
 

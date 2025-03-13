@@ -26,26 +26,20 @@ class userRegister(APIView):
         data = request.data
         otp = generateOtp()
         data['otp'] = otp
-
-        subject = f"Your OTP is {otp}"
-        message = "OTP for Registration"
-
-        userotp = Userotp.objects.filter(email=data['email'])
-        if userotp:
-            userotp.update(otp=otp)
-        else:
-            serializer = UserotpSerializer(data=data)
-            if serializer.is_valid():
-                serializer.save()
+        serializer = UserotpSerializer(data=data)
+        if serializer.is_valid():
+            serializer.save()
+            subject = f"Your OTP is {otp}"
+            message = "OTP for Registration"
+            mail = sendMail(data['email'], otp, message, subject)
+            if mail == True:
+                return Response({"message":"otp sent to mail"}, status=status.HTTP_201_CREATED)
             else:
-                return Response(serializer.errors)
-        mail = sendMail(data['email'], otp, message, subject)
-        if mail == True:
-
-            return Response({'message': "otp sent to emial"}, status=status.HTTP_200_OK)
+                return Response({"message":"unexpected error found while sending otp"}, status=status.HTTP_400_BAD_REQUEST)
         else:
-            return Response({"message": "unexpexted error found while sending otp"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response(serializer.errors)
 
+        
 
 class verifyRegistration(APIView):
     permission_classes = [AllowAny]
@@ -64,21 +58,20 @@ class verifyRegistration(APIView):
             if serializer.is_valid():
                 serializer.save()
                 otp_obj.delete()
-                return Response({"message": "otp validated and user created"},status=status.HTTP_201_CREATED)
+                return Response({"message": "otp validated and user created"}, status=status.HTTP_201_CREATED)
             else:
                 return Response(serializer.errors)
         else:
             return Response({"message": "otp or email enterd invalid "}, status=status.HTTP_400_BAD_REQUEST)
-
-     
 
 
 class loginUser(APIView):
     permission_classes = [AllowAny]
 
     def post(self, request):
-        email = request.data['email']
         password = request.data['password']
+        email = request.data['email']
+
         user = authenticate(username=email, password=password)
 
         if user:
