@@ -3,7 +3,6 @@ from django.http import HttpResponse
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-from rest_framework.permissions import IsAuthenticated
 from django.contrib.auth.models import User
 from .models import Userotp
 from .serializers import UserotpSerializer, userSerilaizer
@@ -53,6 +52,7 @@ class userRegister(APIView):
 
 class verifyRegistration(APIView):
     permission_classes = [AllowAny]
+
     def post(self, request):
         email = request.data['email']
         otp = request.data['otp']
@@ -79,46 +79,43 @@ class verifyRegistration(APIView):
 
 class loginUser(APIView):
     permission_classes = [AllowAny]
+
     def post(self, request):
         email = request.data['email']
         password = request.data['password']
-        user = authenticate(username=email,password=password)
+        user = authenticate(username=email, password=password)
 
         if user:
-                token, created = Token.objects.get_or_create(user=user)
-                response = Response({'message': 'Login successful'})
-                response.set_cookie(
-                    key='auth_token',
-                    value=token.key,
-                    # Prevents JavaScript access (XSS protection)
-                    httponly=True,
-                    samesite='Lax',  # Adjust based on frontend/backend deployment setup
-                    secure=True  # Use only in HTTPS environments
-                )
-                return response
+            token, created = Token.objects.get_or_create(user=user)
+            response = Response({'message': 'Login successful'})
+            response.set_cookie(
+                key='auth_token',
+                value=token.key,
+                # Prevents JavaScript access (XSS protection)
+                httponly=True,
+                samesite='Lax',  # Adjust based on frontend/backend deployment setup
+                secure=True  # Use only in HTTPS environments
+            )
+            return response
         return Response({'error': 'Invalid credentials'}, status=400)
-    
-    
-    
+
+
 class logoutUser(APIView):
-    permission_classes=[AllowAny]
-    def post(self,request):
+    permission_classes = [AllowAny]
+
+    def post(self, request):
         response = Response({'message': 'Logged out'})
         response.delete_cookie('auth_token')
         return response
 
-    
-    
-    
+
 class userDetail(APIView):
-    
-    
-    permission_classes=[IsAuthenticated]
-    
-    def get(self,request):
-        token = request.COOKIES.get('auth_token')
-    
-        
+
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        print(request.user)
+
         return Response('test')
 
 #
