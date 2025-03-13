@@ -142,22 +142,13 @@ EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
-EMAIL_HOST_USER = 'sreeragtv91@gmail.com'  # Your Gmail address
-EMAIL_HOST_PASSWORD = 'gqbl mbol rbxl ljbp'  # Your Gmail password or App Password
+EMAIL_HOST_USER = 'sreeragtv91@gmail.com' 
+EMAIL_HOST_PASSWORD = 'gqbl mbol rbxl ljbp' 
 DEFAULT_FROM_EMAIL = 'sreeragtv91@gmail.com'
 
 
 
 
 
-REST_FRAMEWORK = {
-    'DEFAULT_AUTHENTICATION_CLASSES': [
-        'authentication.middleware.CookieTokenAuthentication',
-    ]
-}
 
-REST_FRAMEWORK = {
-    'DEFAULT_PERMISSION_CLASSES': [
-        'rest_framework.permissions.IsAuthenticated',
-    ]
-}
+

@@ -13,3 +13,6 @@ class UserotpSerializer(serializers.ModelSerializer):
     class Meta:
         model = Userotp
         fields = '__all__'
+   
+        
+

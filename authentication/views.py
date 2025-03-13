@@ -23,39 +23,65 @@ class userRegister(APIView):
     permission_classes = [AllowAny]
 
     def post(self, request):
-        email = request.data.get('email')
-        password = request.data.get('password')
+        data = request.data
         otp = generateOtp()
-        request.data['otp'] = otp
-
-        if User.objects.filter(email=email).exists():
-            return Response({'error': 'User already exists'}, status=status.HTTP_400_BAD_REQUEST)
+        data['otp'] = otp
 
         subject = f"Your OTP is {otp}"
         message = "OTP for Registration"
-        mail = sendMail(email, otp, message, subject)
-        if mail == True:
-            if Userotp.objects.filter(email=email).exists():
-                Userotp.objects.filter(email=email).update(otp=otp)
-            else:
-                serializer = UserotpSerializer(data=request.data)
 
-                if serializer.is_valid():
-                    serializer.save()
-                else:
-                    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        userotp = Userotp.objects.filter(email=data['email'])
+        if userotp:
+            userotp.update(otp=otp)
         else:
-            return Response({'error': 'unexpexted error found'}, status=status.HTTP_400_BAD_REQUEST)
+            serializer = UserotpSerializer(data=data)
+            if serializer.is_valid():
+                serializer.save()
+            else:
+                return Response(serializer.errors)
+        mail = sendMail(data['email'], otp, message, subject)
+        if mail == True:
 
-        return Response({'message': 'OTP sent to your email'}, status=status.HTTP_200_OK)
+            return Response({'message': "otp sent to emial"})
+        else:
+            return Response({"message": "unexpexted error found while sending otp"})
+
+    # def post(self, request):
+    #     email = request.data.get('email')
+    #     password = request.data.get('password')
+    #     otp = generateOtp()
+    #     request.data['otp'] = otp
+    #     serializer = UserotpSerializer(data=request.data)
+    #     if serializer.is_valid():
+    #         serializer.save()
+    #     else:
+    #         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    #     subject = f"Your OTP is {otp}"
+    #     message = "OTP for Registration"
+    #     mail = sendMail(email, otp, message, subject)
+    #     if mail == True:
+    #         if Userotp.objects.filter(email=email).exists():
+    #             Userotp.objects.filter(email=email).update(otp=otp)
+    #         else:
+    #             serializer = UserotpSerializer(data=request.data)
+
+    #             if serializer.is_valid():
+    #                 serializer.save()
+    #             else:
+    #                 return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    #     else:
+    #         return Response({'error': 'unexpexted error found'}, status=status.HTTP_400_BAD_REQUEST)
+
+    #     return Response({'message': 'OTP sent to your email'}, status=status.HTTP_200_OK)
 
 
 class verifyRegistration(APIView):
     permission_classes = [AllowAny]
 
     def post(self, request):
-        email = request.data['email']
-        otp = request.data['otp']
+        email = request.data.get('email')
+        otp = request.data.get('otp')
 
         if Userotp.objects.filter(email=email, otp=otp).exists():
             userotp = Userotp.objects.get(email=email, otp=otp)
@@ -117,5 +143,3 @@ class userDetail(APIView):
         print(request.user)
 
         return Response('test')
-
-#
