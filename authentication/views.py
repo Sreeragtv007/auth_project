@@ -27,52 +27,70 @@ class userRegister(APIView):
         otp = generateOtp()
         data['otp'] = otp
         serializer = UserotpSerializer(data=data)
+        print(serializer)
         if serializer.is_valid():
             serializer.save()
             subject = f"Your OTP is {otp}"
             message = "OTP for Registration"
-            mail = sendMail(data['email'], otp, message, subject)
+            try:
+                mail = sendMail(data['email'], otp, message, subject)
+            except:
+                return Response({"message": "unexpected error found while sending otp"}, status=status.HTTP_400_BAD_REQUEST)
             if mail == True:
-                return Response({"message":"otp sent to mail"}, status=status.HTTP_201_CREATED)
+                return Response({"message": "otp sent to mail"}, status=status.HTTP_201_CREATED)
             else:
-                return Response({"message":"unexpected error found while sending otp"}, status=status.HTTP_400_BAD_REQUEST)
+                return Response({"message": "unexpected error found while sending otp"}, status=status.HTTP_400_BAD_REQUEST)
         else:
             return Response(serializer.errors)
 
-        
 
 class verifyRegistration(APIView):
     permission_classes = [AllowAny]
 
     def post(self, request):
-        data = request.data
+        email = request.data.get('email')
+        otp = request.data.get('otp')
+
+        if not email or not otp:
+            return Response({"message": "Email and OTP are required"}, status=status.HTTP_400_BAD_REQUEST)
         try:
-            otp_obj = Userotp.objects.get(email=data['email'], otp=data['otp'])
+            otp_obj = Userotp.objects.get(email=email, otp=otp)
         except:
-            return Response({"message": "otp or email enterd invalid "})
+            return Response({"message": "invalid otp"})
 
         if otp_obj:
-            request.data['password'] = otp_obj.password
-            request.data['username'] = otp_obj.email
-            serializer = userSerilaizer(data=request.data)
-            if serializer.is_valid():
-                serializer.save()
-                otp_obj.delete()
-                return Response({"message": "otp validated and user created"}, status=status.HTTP_201_CREATED)
-            else:
-                return Response(serializer.errors)
-        else:
-            return Response({"message": "otp or email enterd invalid "}, status=status.HTTP_400_BAD_REQUEST)
+            password=str(otp_obj.password)
+            otp_obj.delete()
+            if User.objects.filter(username=email).exists():
+                return Response({"message":"otp verified user created"})
+            try:
+                
+                user=User.objects.create_user(username=email,password=password)
+                
+            except Exception as e:
+                return Response({"message":str(e)})
+            return Response({"message":"otp verified user created"})
+            
+            
+            
+            
+            
+             
+            
 
 
 class loginUser(APIView):
     permission_classes = [AllowAny]
 
     def post(self, request):
-        password = request.data['password']
-        email = request.data['email']
+        password = request.data.get('password')
+        email = request.data.get('email')
+        if not email or not password:
+            return Response({"message": "Email and password are required"}, status=status.HTTP_400_BAD_REQUEST)
+       
 
-        user = authenticate(username=email, password=password)
+        user = authenticate(username=email,password=password)
+        
 
         if user:
             token, created = Token.objects.get_or_create(user=user)
@@ -80,10 +98,10 @@ class loginUser(APIView):
             response.set_cookie(
                 key='auth_token',
                 value=token.key,
-                # Prevents JavaScript access (XSS protection)
+
                 httponly=True,
-                samesite='Lax',  # Adjust based on frontend/backend deployment setup
-                secure=True  # Use only in HTTPS environments
+                samesite='Lax',
+                secure=True
             )
             return response
         return Response({'error': 'Invalid credentials'}, status=400)
