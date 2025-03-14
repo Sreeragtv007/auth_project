@@ -1,6 +1,6 @@
 
 import random
-
+from rest_framework.authtoken.models import Token
 from auth import settings
 from django.core.mail import send_mail
 
@@ -23,3 +23,10 @@ def sendMail(email, otp, subject, message):
         return e
 
     return True
+
+
+def getuser(request):
+    token = request.COOKIES.get('auth_token')
+
+    tokenobj = Token.objects.get(key=token)
+    return tokenobj.user

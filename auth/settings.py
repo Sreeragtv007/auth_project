@@ -148,6 +148,30 @@ DEFAULT_FROM_EMAIL = 'sreeragtv91@gmail.com'
 
 
 
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.SessionAuthentication',
+        'rest_framework.authentication.BasicAuthentication',
+    ],
+}
+
+SWAGGER_SETTINGS = {
+    'USE_SESSION_AUTH': True, 
+    'SECURITY_DEFINITIONS': {
+        'basic': {
+            'type': 'basic'
+        }
+    },
+}
+
+
+
+
+
+
+
+
+
 
 
 

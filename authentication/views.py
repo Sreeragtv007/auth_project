@@ -6,17 +6,11 @@ from rest_framework import status
 from django.contrib.auth.models import User
 from .models import Userotp
 from .serializers import UserotpSerializer, userSerilaizer
-from authentication.utilis import generateOtp, sendMail
-from django.contrib.auth import authenticate, login
+from authentication.utilis import generateOtp, sendMail, getuser
+from django.contrib.auth import authenticate
 from rest_framework.permissions import IsAuthenticated, AllowAny
-from rest_framework.decorators import permission_classes, authentication_classes
+
 from rest_framework.authtoken.models import Token
-# Create your views here.
-
-
-class test(APIView):
-    def get(self, request):
-        return HttpResponse("Hello World")
 
 
 class userRegister(APIView):
@@ -59,24 +53,18 @@ class verifyRegistration(APIView):
             return Response({"message": "invalid otp"})
 
         if otp_obj:
-            password=str(otp_obj.password)
+            password = str(otp_obj.password)
             otp_obj.delete()
             if User.objects.filter(username=email).exists():
-                return Response({"message":"otp verified user created"})
+                return Response({"message": "otp verified user created"})
             try:
-                
-                user=User.objects.create_user(username=email,password=password)
-                
+
+                user = User.objects.create_user(
+                    username=email, password=password)
+
             except Exception as e:
-                return Response({"message":str(e)})
-            return Response({"message":"otp verified user created"})
-            
-            
-            
-            
-            
-             
-            
+                return Response({"message": str(e)})
+            return Response({"message": "otp verified user created"})
 
 
 class loginUser(APIView):
@@ -87,10 +75,8 @@ class loginUser(APIView):
         email = request.data.get('email')
         if not email or not password:
             return Response({"message": "Email and password are required"}, status=status.HTTP_400_BAD_REQUEST)
-       
 
-        user = authenticate(username=email,password=password)
-        
+        user = authenticate(username=email, password=password)
 
         if user:
             token, created = Token.objects.get_or_create(user=user)
@@ -121,6 +107,6 @@ class userDetail(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        print(request.user)
+        user = getuser(request)
 
-        return Response('test')
+        return Response({"logged in user": str(user)})
