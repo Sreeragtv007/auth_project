@@ -1,4 +1,4 @@
-Clone the repository : git clone
+Clone the repository : git clone https://github.com/Sreeragtv007/auth_project.git
 
 Navigate to the project directory
 
