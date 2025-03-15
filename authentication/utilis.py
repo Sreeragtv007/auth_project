@@ -20,8 +20,8 @@ def sendMail(email, otp, subject, message):
             [email],
             fail_silently=False,
         )
-    except Exception as e:
-        return e
+    except :
+        return False
 
     return True
 

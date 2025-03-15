@@ -17,7 +17,7 @@ class userRegister(APIView):
 
     def post(self, request):
         data = request.data
-        otp = generateOtp()
+        otp = generateOtp() # custom function to genrate otp
         data['otp'] = otp
         serializer = UserotpSerializer(data=data)
 
@@ -26,7 +26,7 @@ class userRegister(APIView):
             subject = f"Your OTP is {otp}"
             message = "OTP for Registration"
             try:
-                mail = sendMail(data['email'], otp, message, subject)
+                mail = sendMail(data['email'], otp, message, subject) # custom function to send otp via email
             except:
                 return Response({"message": "unexpected error found while sending otp"}, status=status.HTTP_400_BAD_REQUEST)
             if mail == True:
@@ -108,10 +108,10 @@ class logoutUser(APIView):
 
 class userDetail(APIView):
 
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated] # modified the default isauthenticated class
 
     def get(self, request):
-        user = getuser(request)
+        user = getuser(request) # custom function to get the authencated user
         
 
         return Response({"message": "user details", "logged in user": str(user)},status=status.HTTP_200_OK)
