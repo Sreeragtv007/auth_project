@@ -1,5 +1,4 @@
-from django.shortcuts import redirect, render, get_object_or_404
-from django.http import HttpResponse
+
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
@@ -21,7 +20,7 @@ class userRegister(APIView):
         otp = generateOtp()
         data['otp'] = otp
         serializer = UserotpSerializer(data=data)
-        
+
         if serializer.is_valid():
             serializer.save()
             subject = f"Your OTP is {otp}"
@@ -54,19 +53,22 @@ class verifyRegistration(APIView):
 
         if otp_obj:
             password = str(otp_obj.password)
-            otp_obj.delete()
+
             if User.objects.filter(username=email).exists():
-                user = User.objects.get(email=email)
+                user = User.objects.get(username=email)
                 user.set_password(str(otp_obj.password))
-                return Response({"message": "otp verified user created"})
+                user.save()
+                otp_obj.delete()
+                return Response({"message": "otp verified user created"},status=status.HTTP_201_CREATED)
             try:
 
                 user = User.objects.create_user(
                     username=email, password=password)
+                otp_obj.delete()
 
             except Exception as e:
                 return Response({"message": str(e)})
-            return Response({"message": "otp verified user created"})
+            return Response({"message": "otp verified user created"},status=status.HTTP_201_CREATED)
 
 
 class loginUser(APIView):
@@ -92,14 +94,14 @@ class loginUser(APIView):
                 secure=True
             )
             return response
-        return Response({'error': 'Invalid credentials'}, status=400)
+        return Response({'error': 'Invalid credentials'},status=status.HTTP_400_BAD_REQUEST)
 
 
 class logoutUser(APIView):
     permission_classes = [AllowAny]
 
     def post(self, request):
-        response = Response({'message': 'Logged out'})
+        response = Response({'message': 'Logged out'},status=status.HTTP_200_OK)
         response.delete_cookie('auth_token')
         return response
 
@@ -110,6 +112,6 @@ class userDetail(APIView):
 
     def get(self, request):
         user = getuser(request)
-        print(user)
+        
 
-        return Response({"message":"user details","logged in user": str(user)})
+        return Response({"message": "user details", "logged in user": str(user)},status=status.HTTP_200_OK)
