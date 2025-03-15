@@ -21,7 +21,7 @@ class userRegister(APIView):
         otp = generateOtp()
         data['otp'] = otp
         serializer = UserotpSerializer(data=data)
-        print(serializer)
+        
         if serializer.is_valid():
             serializer.save()
             subject = f"Your OTP is {otp}"
@@ -56,6 +56,8 @@ class verifyRegistration(APIView):
             password = str(otp_obj.password)
             otp_obj.delete()
             if User.objects.filter(username=email).exists():
+                user = User.objects.get(email=email)
+                user.set_password(str(otp_obj.password))
                 return Response({"message": "otp verified user created"})
             try:
 
@@ -108,5 +110,6 @@ class userDetail(APIView):
 
     def get(self, request):
         user = getuser(request)
+        print(user)
 
-        return Response({"logged in user": str(user)})
+        return Response({"message":"user details","logged in user": str(user)})
